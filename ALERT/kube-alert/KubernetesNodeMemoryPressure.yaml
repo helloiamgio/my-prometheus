@@ -1,0 +1,13 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesNodeMemoryPressure
+spec:
+  annotations:
+    description: '"Node {{ $labels.node }} has MemoryPressure condition\n  VALUE =
+      {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Node memory pressure (instance {{ $labels.instance }})
+  expr: kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
+  for: 2m
+  labels:
+    severity: critical

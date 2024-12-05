@@ -1,0 +1,13 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesCronjobSuspended
+spec:
+  annotations:
+    description: '"CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is suspended\n  VALUE
+      = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes CronJob suspended (instance {{ $labels.instance }})
+  expr: kube_cronjob_spec_suspend != 0
+  for: 0m
+  labels:
+    severity: warning

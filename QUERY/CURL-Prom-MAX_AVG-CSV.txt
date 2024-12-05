@@ -1,0 +1,86 @@
+### CPU MAX
+curl -G -s -k -H "Authorization: Bearer $token" \
+'https://thanos-querier-openshift-monitoring.apps.ocp1-produzione.cariprpc.it/api/v1/query' \
+--data-urlencode 'query=max_over_time(namespace:container_cpu_usage:sum[14d])' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv'
+
+### CPU AVERAGE
+curl -G -s -k -H "Authorization: Bearer $token" \
+'https://thanos-querier-openshift-monitoring.apps.ocp1-produzione.cariprpc.it/api/v1/query' \
+--data-urlencode 'query=avg_over_time(namespace:container_cpu_usage:sum[14d])' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv'
+
+### RAM MAX
+curl -G -s -k -H "Authorization: Bearer $token" \
+'https://thanos-querier-openshift-monitoring.apps.ocp1-produzione.cariprpc.it/api/v1/query' \
+--data-urlencode 'query=max_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv'
+
+### RAM AVERAGE
+curl -G -s -k -H "Authorization: Bearer $token" \
+'https://thanos-querier-openshift-monitoring.apps.ocp1-produzione.cariprpc.it/api/v1/query' \
+--data-urlencode 'query=avg_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv'
+
+##################################################################################################################
+
+oc login -u kubeadmin $(oc whoami --show-server)  --> enter password
+export token=$(oc whoami -t)
+export THANOS_URL=$(oc get routes -n openshift-monitoring | grep thanos | awk '{print $2}')
+echo $token $THANOS_URL
+### CPU MAX
+curl -G -s -k -H "Authorization: Bearer $token" \
+"https://$THANOS_URL/api/v1/query" \
+--data-urlencode 'query=max_over_time(namespace:container_cpu_usage:sum[14d])' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv' > cpu_max.csv
+
+### CPU AVERAGE
+curl -G -s -k -H "Authorization: Bearer $token" \
+"https://$THANOS_URL/api/v1/query" \
+--data-urlencode 'query=avg_over_time(namespace:container_cpu_usage:sum[14d])' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv' > cpu_avg.csv
+
+### RAM MAX
+curl -G -s -k -H "Authorization: Bearer $token" \
+"https://$THANOS_URL/api/v1/query" \
+--data-urlencode 'query=max_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv' > ram_max.csv
+
+### RAM AVERAGE
+curl -G -s -k -H "Authorization: Bearer $token" \
+"https://$THANOS_URL/api/v1/query" \
+--data-urlencode 'query=avg_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024' | \
+jq -r '.data.result[] | [.metric.namespace, .value[1]] | @csv' > ram_avg.csv
+
+##################################################################################################################
+
+cat << 'EOF' > metrics-report.py
+#!/usr/bin/env python3
+
+import pandas as pd
+import os
+
+# Lista dei file CSV da processare (aggiornata con i nomi dei file disponibili)
+files = {
+    "cpu_avg.csv": "CPU_AVG",
+    "cpu_max.csv": "CPU_MAX",
+    "ram_avg.csv": "RAM_AVG",
+    "ram_max.csv": "RAM_MAX"
+}
+
+# Verifica che i file esistano prima di procedere
+missing_files = [file for file in files if not os.path.isfile(file)]
+if missing_files:
+    print(f"Errore: I seguenti file sono mancanti: {', '.join(missing_files)}")
+else:
+    # Creazione di un writer per un file Excel
+    with pd.ExcelWriter('metrics_report.xlsx') as writer:
+        for file, sheet_name in files.items():
+            df = pd.read_csv(file, header=None, names=["Namespace", sheet_name])
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    print("Report generato: metrics_report.xlsx")
+EOF
+
+
+

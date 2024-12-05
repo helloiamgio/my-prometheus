@@ -1,0 +1,39 @@
+max_over_time(namespace:container_cpu_usage:sum{namespace="$NS"}[14d])
+avg_over_time(namespace:container_cpu_usage:sum{namespace="$NS"}[14d])
+
+max_over_time(namespace:container_memory_usage_bytes:sum{namespace="$NS"}[14d]) / 1024 / 1024 / 1024
+avg_over_time(namespace:container_memory_usage_bytes:sum{namespace="$NS"}[14d]) / 1024 / 1024 / 1024
+
+
+max_over_time(namespace:container_cpu_usage:sum[14d])
+avg_over_time(namespace:container_cpu_usage:sum[14d])
+
+max_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024
+avg_over_time(namespace:container_memory_usage_bytes:sum[14d]) / 1024 / 1024 / 1024
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+### Average CPU Usage ###
+avg(rate(container_cpu_usage_seconds_total{namespace="<your-namespace>", container!="POD", container!=""}[5m])) by (namespace)
+
+### Max CPU Usage###
+max(rate(container_cpu_usage_seconds_total{namespace="<your-namespace>", container!="POD", container!=""}[5m])) by (namespace)
+
+### Average Memory Usage ###
+avg(container_memory_usage_bytes{namespace="<your-namespace>", container!="POD", container!=""}) by (namespace)
+
+### Max Memory Usage ###
+max(container_memory_usage_bytes{namespace="<your-namespace>", container!="POD", container!=""}) by (namespace)
+
+
+### Average CPU Usage for All Namespaces: ###
+avg(rate(container_cpu_usage_seconds_total{container!="POD", container!=""}[5m])) by (namespace)
+
+### Max CPU Usage for All Namespaces: ###
+max(rate(container_cpu_usage_seconds_total{container!="POD", container!=""}[5m])) by (namespace)
+
+### Average Memory Usage for All Namespaces ###
+avg(container_memory_usage_bytes{container!="POD", container!=""}) by (namespace)
+
+### Max Memory Usage for All Namespaces: ###
+max(container_memory_usage_bytes{container!="POD", container!=""}) by (namespace)

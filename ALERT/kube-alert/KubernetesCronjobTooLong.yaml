@@ -1,0 +1,13 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesCronjobTooLong
+spec:
+  annotations:
+    description: '"CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking
+      more than 1h to complete.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes CronJob too long (instance {{ $labels.instance }})
+  expr: time() - kube_cronjob_next_schedule_time > 3600
+  for: 0m
+  labels:
+    severity: warning

@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesNodeNetworkUnavailable
+spec:
+  annotations:
+    description: '"Node {{ $labels.node }} has NetworkUnavailable condition\n  VALUE
+      = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Node network unavailable (instance {{ $labels.instance }})
+  expr: kube_node_status_condition{condition="NetworkUnavailable",status="true"} ==
+    1
+  for: 2m
+  labels:
+    severity: critical

@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesApiServerErrors
+spec:
+  annotations:
+    description: '"Kubernetes API server is experiencing high error rate\n  VALUE
+      = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes API server errors (instance {{ $labels.instance }})
+  expr: sum(rate(apiserver_request_total{job="apiserver",code=~"(?:5..)"}[1m])) by
+    (instance, job) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) by (instance,
+    job) * 100 > 3
+  for: 2m
+  labels:
+    severity: critical

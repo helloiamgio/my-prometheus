@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerLowMemoryUsage
+spec:
+  annotations:
+    description: '"Container Memory usage is under 20% for 1 week. Consider reducing
+      the allocated memory.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Container Low Memory usage (instance {{ $labels.instance }})
+  expr: (sum(container_memory_working_set_bytes{name!=""}) BY (instance, name) / sum(container_spec_memory_limit_bytes
+    > 0) BY (instance, name) * 100) < 20
+  for: 7d
+  labels:
+    severity: info

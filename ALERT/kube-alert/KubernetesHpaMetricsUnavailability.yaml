@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesHpaMetricsUnavailability
+spec:
+  annotations:
+    description: '"HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler
+      }} is unable to collect metrics\n  VALUE = {{ $value }}\n  LABELS = {{ $labels
+      }}"'
+    summary: Kubernetes HPA metrics unavailability (instance {{ $labels.instance }})
+  expr: kube_horizontalpodautoscaler_status_condition{status="false", condition="ScalingActive"}
+    == 1
+  for: 0m
+  labels:
+    severity: warning

@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerVolumeUsage
+spec:
+  annotations:
+    description: '"Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS
+      = {{ $labels }}"'
+    summary: Container Volume usage (instance {{ $labels.instance }})
+  expr: (1 - (sum(container_fs_inodes_free{name!=""}) BY (instance) / sum(container_fs_inodes_total)
+    BY (instance))) * 100 > 80
+  for: 2m
+  labels:
+    severity: warning

@@ -1,0 +1,13 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesNodeNotReady
+spec:
+  annotations:
+    description: '"Node {{ $labels.node }} has been unready for a long time\n  VALUE
+      = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Node not ready (instance {{ $labels.instance }})
+  expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+  for: 10m
+  labels:
+    severity: critical

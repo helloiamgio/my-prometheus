@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesPersistentvolumeclaimPending
+spec:
+  annotations:
+    description: '"PersistentVolumeClaim {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim
+      }} is pending\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes PersistentVolumeClaim pending (instance {{ $labels.instance
+      }})
+  expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1
+  for: 2m
+  labels:
+    severity: warning

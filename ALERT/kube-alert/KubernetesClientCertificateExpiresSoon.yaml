@@ -1,0 +1,16 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesClientCertificateExpiresSoon
+spec:
+  annotations:
+    description: '"A client certificate used to authenticate to the apiserver is expiring
+      in less than 24.0 hours.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes client certificate expires soon (instance {{ $labels.instance
+      }})
+  expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0
+    and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m])))
+    < 24*60*60
+  for: 0m
+  labels:
+    severity: critical

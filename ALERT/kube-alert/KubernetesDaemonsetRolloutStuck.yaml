@@ -1,0 +1,16 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesDaemonsetRolloutStuck
+spec:
+  annotations:
+    description: '"Some Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
+      }} are not scheduled or not ready\n  VALUE = {{ $value }}\n  LABELS = {{ $labels
+      }}"'
+    summary: Kubernetes DaemonSet rollout stuck (instance {{ $labels.instance }})
+  expr: kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled
+    * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled
+    > 0
+  for: 10m
+  labels:
+    severity: warning

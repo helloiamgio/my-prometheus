@@ -1,0 +1,13 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesJobFailed
+spec:
+  annotations:
+    description: '"Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete\n  VALUE
+      = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Job failed (instance {{ $labels.instance }})
+  expr: kube_job_status_failed > 0
+  for: 0m
+  labels:
+    severity: warning

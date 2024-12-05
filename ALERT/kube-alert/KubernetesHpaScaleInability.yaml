@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesHpaScaleInability
+spec:
+  annotations:
+    description: '"HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler
+      }} is unable to scale\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes HPA scale inability (instance {{ $labels.instance }})
+  expr: (kube_horizontalpodautoscaler_spec_max_replicas - kube_horizontalpodautoscaler_status_desired_replicas)
+    * on (horizontalpodautoscaler,namespace) (kube_horizontalpodautoscaler_status_condition{condition="ScalingLimited",
+    status="true"} == 1) == 0
+  for: 2m
+  labels:
+    severity: warning

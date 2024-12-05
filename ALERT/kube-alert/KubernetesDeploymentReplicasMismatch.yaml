@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesDeploymentReplicasMismatch
+spec:
+  annotations:
+    description: '"Deployment {{ $labels.namespace }}/{{ $labels.deployment }} replicas
+      mismatch\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Deployment replicas mismatch (instance {{ $labels.instance
+      }})
+  expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+  for: 10m
+  labels:
+    severity: warning

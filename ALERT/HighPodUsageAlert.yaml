@@ -1,0 +1,37 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: high-pod-cpu-usage-alert
+  namespace: openshift-monitoring 
+spec:
+  groups:
+  - name: high-pod-cpu-usage-alert
+    rules:
+    - alert: HighPodCPUUsageAlert 
+      for: 1m 
+      expr: |
+        (sum by (pod, namespace) (rate(container_cpu_usage_seconds_total{container!="",image!=""}[5m])) 
+        / sum by (pod, namespace) (kube_pod_container_resource_limits{resource="cpu"})) * 100 > 90
+      labels:
+        severity: warning 
+      annotations:
+        description: "{{ $labels.namespace }}/{{ $labels.pod }} is using more than 80% of its CPU limit."
+---
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: high-pod-memory-usage-alert
+  namespace: openshift-monitoring 
+spec:
+  groups:
+  - name: high-pod-memory-usage-alert
+    rules:
+    - alert: HighPodMemoryUsageAlert 
+      for: 1m 
+      expr: |
+        (sum by (pod, namespace) (container_memory_usage_bytes{container!="",image!=""})
+        / sum by (pod, namespace) (kube_pod_container_resource_limits{resource="memory"})) * 100 > 90
+      labels:
+        severity: warning 
+      annotations:
+        description: "{{ $labels.namespace }}/{{ $labels.pod }} is using more than 80% of its Memory limit."

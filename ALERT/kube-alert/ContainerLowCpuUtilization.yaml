@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerLowCpuUtilization
+spec:
+  annotations:
+    description: '"Container CPU utilization is under 20% for 1 week. Consider reducing
+      the allocated CPU.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Container Low CPU utilization (instance {{ $labels.instance }})
+  expr: (sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod,
+    container) / sum(container_spec_cpu_quota{container!=""}/container_spec_cpu_period{container!=""})
+    by (pod, container) * 100) < 20
+  for: 7d
+  labels:
+    severity: info

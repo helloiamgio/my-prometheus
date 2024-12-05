@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesJobSlowCompletion
+spec:
+  annotations:
+    description: '"Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did
+      not complete in time.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes Job slow completion (instance {{ $labels.instance }})
+  expr: kube_job_spec_completions - kube_job_status_succeeded - kube_job_status_failed
+    > 0
+  for: 12h
+  labels:
+    severity: critical

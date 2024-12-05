@@ -1,0 +1,14 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerHighMemoryUsage
+spec:
+  annotations:
+    description: '"Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS
+      = {{ $labels }}"'
+    summary: Container High Memory usage (instance {{ $labels.instance }})
+  expr: (sum(container_memory_working_set_bytes{name!=""}) BY (instance, name) / sum(container_spec_memory_limit_bytes
+    > 0) BY (instance, name) * 100) > 80
+  for: 2m
+  labels:
+    severity: warning

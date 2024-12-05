@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesDeploymentGenerationMismatch
+spec:
+  annotations:
+    description: '"Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has
+      failed but has not been rolled back.\n  VALUE = {{ $value }}\n  LABELS = {{
+      $labels }}"'
+    summary: Kubernetes Deployment generation mismatch (instance {{ $labels.instance
+      }})
+  expr: kube_deployment_status_observed_generation != kube_deployment_metadata_generation
+  for: 10m
+  labels:
+    severity: critical

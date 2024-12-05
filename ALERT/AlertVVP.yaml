@@ -1,0 +1,37 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: vvp-pod-active-alert
+  namespace: vvp
+spec:
+  groups:
+  - name: vvp-pod-check
+    rules:
+    - alert: VVPVervericaPlatformPodActive
+      expr: |
+        count(namespace_workload_pod:kube_pod_owner:relabel{namespace="vvp", pod=~"vvp-ververica-platform-.+"}) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "VVP Ververica Platform Pod Active"
+        description: "Il pod 'vvp-ververica-platform-xxx-yyy' è attivo nel namespace 'vvp'. Non dovrebbe esserci nessun pod attivo."
+---
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: vvp-namespaces-pod-active-alert
+  namespace: monitoring
+spec:
+  groups:
+  - name: vvp-namespaces-pod-check
+    rules:
+    - alert: VVPNamespacePodActive
+      expr: |
+        count(namespace_workload_pod:kube_pod_owner:relabel{namespace=~".*-vvp-.*"}) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod attivi nei namespace contenenti -vvp-"
+        description: "Ci sono pod attivi nei namespace con nome contenente '-vvp-'. Non dovrebbe esserci nessun pod attivo."

@@ -1,0 +1,81 @@
+### TOTAL REQUEST in MB
+(
+  sum(
+    max by (namespace, pod, node) (
+      kube_pod_container_resource_requests{resource="memory"}
+    ) * on (namespace, pod) group_left() (
+      max by (pod, namespace) (
+        kube_pod_status_phase{phase="Running"}
+      ) == 1
+    )
+  ) by (node)
+) / 1e6
+
+
+
+### % MEM Nodi 
+(
+  1 - (
+    sum by (instance) (
+      node_memory_MemFree_bytes
+      + node_memory_Buffers_bytes
+      + node_memory_Cached_bytes
+    ) / sum by (instance) (node_memory_MemTotal_bytes)
+  )
+) * 100
+
+
+### % MEM REQ vs. AVAIL
+sum(
+  max(kube_pod_container_resource_requests{resource="memory"}) by (namespace, pod, node)
+  * on (namespace, pod) group_left()
+  (max(kube_pod_status_phase{phase="Running"}) by (pod, namespace) == 1)
+) by (node)
+/
+sum(
+  kube_node_status_capacity{resource="memory"}
+) by (node)
+* 100
+
+### % CPU REQ vs. AVAIL
+sum(
+  max(kube_pod_container_resource_requests{resource="cpu"}) by (namespace, pod, node)
+  * on (namespace, pod) group_left()
+  (max(kube_pod_status_phase{phase="Running"}) by (pod, namespace) == 1)
+) by (node)
+/
+sum(
+  kube_node_status_capacity{resource="cpu"}
+) by (node)
+* 100
+
+### RESTART COUNT
+increase(kube_pod_container_status_restarts_total{pod="3j-schedacliente-mgw-65d5669ccc-2vzh5", namespace="3j-schedacliente-mgw"}[4h])
+ 
+increase(kube_pod_container_status_restarts_total{pod=~".*-quay-app-.*"}[1h]) > 5
+
+kube_pod_container_resource_limits{resource="memory", pod=~".*mgw.*", container="3j-schedacliente-mgw"}  ### limits
+container_memory_working_set_bytes{pod=~".*mgw.*", container="3j-schedacliente-mgw", namespace="3j-schedacliente-mgw"} ### utils
+
+kube_pod_container_status_last_terminated_reason{reason="OOMKilled",namespace="3j-schedacliente-mgw"} ### OOM
+
+kube_pod_container_status_last_terminated_reason{reason="OOMKilled",namespace="3j-schedacliente-mgw", pod="3j-schedacliente-mgw-65d5669ccc-2vzh5"}
+kube_pod_container_resource_limits{resource="memory", pod=~"3j-schedacliente-mgw-65d5669ccc-2vzh5", container="3j-schedacliente-mgw"}  
+container_memory_working_set_bytes{ pod=~"3j-schedacliente-mgw-65d5669ccc-2vzh5", container="3j-schedacliente-mgw", namespace="3j-schedacliente-mgw"} 
+
+### Query per l'uso della memoria dei pod (in MB)
+sum by(namespace, pod, container) (
+  container_memory_usage_bytes{container!=""} / 1024 / 1024
+)
+
+### Query per l'uso della CPU (in core)
+sum by(namespace, pod, container) (
+  rate(container_cpu_usage_seconds_total{container!=""}[5m])
+)
+
+### POD evicted/failed
+kube_pod_status_reason{reason="Evicted"} > 0
+kube_pod_status_phase{phase="Failed"}
+
+
+

@@ -1,0 +1,48 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: high-resource-usage-alerts
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: high-resource-usage-alerts
+    rules:
+    - alert: HighPodCPUUsageAlert
+      for: 5m
+      expr: |
+        (sum(rate(container_cpu_usage_seconds_total{container!="",namespace!~"^(openshift-.*|kube-.*)$"}[5m])) by (pod, namespace)
+        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 90
+      labels:
+        severity: warning
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its CPU limit."
+
+    - alert: CriticalPodCPUUsageAlert
+      for: 5m
+      expr: |
+        (sum(rate(container_cpu_usage_seconds_total{container!="",namespace!~"^(openshift-.*|kube-.*)$"}[5m])) by (pod, namespace)
+        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 95
+      labels:
+        severity: critical
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its CPU limit."
+
+    - alert: HighPodMemoryUsageAlert
+      for: 5m
+      expr: |
+        (sum(container_memory_usage_bytes{container!="",namespace!~"^(openshift-.*|kube-.*)$"}) by (pod, namespace)
+        / sum(kube_pod_container_resource_limits{resource="memory",namespace!~"^(openshift-.*|kube-.*)$"}) by (pod, namespace)) * 100 > 90
+      labels:
+        severity: warning
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its memory limit."
+
+    - alert: CriticalPodMemoryUsageAlert
+      for: 5m
+      expr: |
+        (sum(container_memory_usage_bytes{container!="",namespace!~"^(openshift-.*|kube-.*)$"}) by (pod, namespace)
+        / sum(kube_pod_container_resource_limits{resource="memory",namespace!~"^(openshift-.*|kube-.*)$"}) by (pod, namespace)) * 100 > 95
+      labels:
+        severity: critical
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its memory limit."

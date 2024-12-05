@@ -1,0 +1,1 @@
+sum(node_memory_MemAvailable_bytes{instance=~".*worker-.*"}) by (instance) / 1024^3

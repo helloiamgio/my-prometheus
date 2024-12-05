@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesPodNotHealthy
+spec:
+  annotations:
+    description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-running\
+      \ state for longer than 15 minutes.\n VALUE = {{ $value }}\n LABELS = {{ $labels\
+      \ }}"
+    summary: Kubernetes Pod not healthy (instance {{ $labels.instance }})
+  expr: sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})
+    > 0
+  for: 15m
+  labels:
+    severity: critical

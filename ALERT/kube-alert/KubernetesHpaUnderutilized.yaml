@@ -1,0 +1,16 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: KubernetesHpaUnderutilized
+spec:
+  annotations:
+    description: '"HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler
+      }} is constantly at minimum replicas for 50% of the time. Potential cost saving
+      here.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Kubernetes HPA underutilized (instance {{ $labels.instance }})
+  expr: max(quantile_over_time(0.5, kube_horizontalpodautoscaler_status_desired_replicas[1d])
+    == kube_horizontalpodautoscaler_spec_min_replicas) by (horizontalpodautoscaler)
+    > 3
+  for: 0m
+  labels:
+    severity: info

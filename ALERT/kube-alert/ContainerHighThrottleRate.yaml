@@ -1,0 +1,15 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerHighThrottleRate
+spec:
+  annotations:
+    description: '"Container is being throttled\n  VALUE = {{ $value }}\n  LABELS
+      = {{ $labels }}"'
+    summary: Container high throttle rate (instance {{ $labels.instance }})
+  expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m]))
+    by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total[5m]))
+    by (container, pod, namespace) > ( 25 / 100 )
+  for: 5m
+  labels:
+    severity: warning

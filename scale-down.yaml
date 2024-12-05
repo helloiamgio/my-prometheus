@@ -1,0 +1,284 @@
+---
+### 3i-scrivaniadigitale-be
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-scaler
+  namespace: 3i-scrivaniadigitale-be
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cronjob-scaler
+rules:
+- apiGroups: ["*"]
+  resources: ["Pods"]
+  verbs: ["get", "list"]
+- apiGroups: ["apps", "extensions"]
+  resources: ["DeploymentConfigs", "Deployments", "StatefulSets"]
+  verbs: ["get", "list", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-scaler
+subjects:
+- kind: ServiceAccount
+  name: cronjob-scaler
+  namespace: 3i-scrivaniadigitale-be
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-scaler
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-scaler-scale-down
+  namespace: 3i-scrivaniadigitale-be
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "0 5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-scaler
+            helm.sh/chart: cronjob-scaler-1.0.0
+            app.kubernetes.io/name: cronjob-scaler
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/version: "1.0.0"
+            app.kubernetes.io/managed-by: Helm
+        spec:
+          serviceAccountName: "cronjob-scaler"
+          serviceAccount: "cronjob-scaler"
+          restartPolicy: Never
+          containers:
+          - name: cronjob-scaler-scale-down
+            image: registry.redhat.io/openshift4/ose-cli:v4.14
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                #oc patch Deployment/app1 --type='json' -p='[{"op": "replace", "path": "/spec/replicas", "value": 1 }]'
+                oc scale deployment --replicas=0 -n 3i-scrivaniadigitale-be --all 
+                set +e
+---
+### 3i-scrivaniadigitale-fe
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-scaler
+  namespace: 3i-scrivaniadigitale-fe
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-scaler
+subjects:
+- kind: ServiceAccount
+  name: cronjob-scaler
+  namespace: 3i-scrivaniadigitale-fe
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-scaler
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-scaler-scale-down
+  namespace: 3i-scrivaniadigitale-fe
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "0 5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-scaler
+            helm.sh/chart: cronjob-scaler-1.0.0
+            app.kubernetes.io/name: cronjob-scaler
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/version: "1.0.0"
+            app.kubernetes.io/managed-by: Helm
+        spec:
+          serviceAccountName: "cronjob-scaler"
+          serviceAccount: "cronjob-scaler"
+          restartPolicy: Never
+          containers:
+          - name: cronjob-scaler-scale-down
+            image: registry.redhat.io/openshift4/ose-cli:v4.14
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                #oc patch Deployment/app1 --type='json' -p='[{"op": "replace", "path": "/spec/replicas", "value": 1 }]'
+                oc scale deployment --replicas=0 -n 3i-scrivaniadigitale-fe --all 
+                set +e
+---
+### 3j-schedacliente-be
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-scaler
+  namespace: 3j-schedacliente-be
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-scaler
+subjects:
+- kind: ServiceAccount
+  name: cronjob-scaler
+  namespace: 3j-schedacliente-be
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-scaler
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-scaler-scale-down
+  namespace: 3j-schedacliente-be
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "0 5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-scaler
+            helm.sh/chart: cronjob-scaler-1.0.0
+            app.kubernetes.io/name: cronjob-scaler
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/version: "1.0.0"
+            app.kubernetes.io/managed-by: Helm
+        spec:
+          serviceAccountName: "cronjob-scaler"
+          serviceAccount: "cronjob-scaler"
+          restartPolicy: Never
+          containers:
+          - name: cronjob-scaler-scale-down
+            image: registry.redhat.io/openshift4/ose-cli:v4.14
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                #oc patch Deployment/app1 --type='json' -p='[{"op": "replace", "path": "/spec/replicas", "value": 1 }]'
+                oc scale deployment --replicas=0 -n 3j-schedacliente-be --all 
+                set +e
+---
+### 3j-schedacliente-fe
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronjob-scaler
+  namespace: 3j-schedacliente-fe
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronjob-scaler
+subjects:
+- kind: ServiceAccount
+  name: cronjob-scaler
+  namespace: 3j-schedacliente-fe
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cronjob-scaler
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-scaler-scale-down
+  namespace: 3j-schedacliente-fe
+  labels:
+    app: cronjob-scaler
+    helm.sh/chart: cronjob-scaler-1.0.0
+    app.kubernetes.io/name: cronjob-scaler
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "0 5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-scaler
+            helm.sh/chart: cronjob-scaler-1.0.0
+            app.kubernetes.io/name: cronjob-scaler
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/version: "1.0.0"
+            app.kubernetes.io/managed-by: Helm
+        spec:
+          serviceAccountName: "cronjob-scaler"
+          serviceAccount: "cronjob-scaler"
+          restartPolicy: Never
+          containers:
+          - name: cronjob-scaler-scale-down
+            image: registry.redhat.io/openshift4/ose-cli:v4.14
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                #oc patch Deployment/app1 --type='json' -p='[{"op": "replace", "path": "/spec/replicas", "value": 1 }]'
+                oc scale deployment --replicas=0 -n 3j-schedacliente-fe --all 
+                set +e                 
