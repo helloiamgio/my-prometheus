@@ -1,5 +1,5 @@
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
 metadata:
   name: pod-stuck
   namespace: openshift-monitoring
