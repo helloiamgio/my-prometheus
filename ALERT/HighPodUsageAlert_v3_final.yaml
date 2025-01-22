@@ -1,1 +1,48 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: high-resource-usage-alerts
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: high-resource-usage-alerts
+    rules:
+    - alert: HighPodCPUUsageAlert
+      for: 5m
+      expr: |
+        sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) 
+        / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) * 100 > 90
+      labels:
+        severity: warning
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its CPU limit."
 
+    - alert: CriticalPodCPUUsageAlert
+      for: 5m
+      expr: |
+        sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) 
+        / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) * 100 > 95
+      labels:
+        severity: critical
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its CPU limit."
+
+    - alert: HighPodMemoryUsageAlert
+      for: 5m
+      expr: |
+        sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace!~"^(openshift-.*|kube-.*)$", container!="", image!=""}) by (pod) 
+        / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) * 100 > 90
+      labels:
+        severity: warning
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its memory limit."
+
+    - alert: CriticalPodMemoryUsageAlert
+      for: 5m
+      expr: |
+        sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace!~"^(openshift-.*|kube-.*)$", container!="", image!=""}) by (pod) 
+        / sum(cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{cluster="", namespace!~"^(openshift-.*|kube-.*)$"}) by (pod) * 100> 95
+      labels:
+        severity: critical
+      annotations:
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using {{ printf \"%.2f\" $value }}% of its memory limit."
