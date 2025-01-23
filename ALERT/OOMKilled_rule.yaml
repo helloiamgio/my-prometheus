@@ -2,6 +2,7 @@ apiVersion: monitoring.openshift.io/v1
 kind: AlertingRule
 metadata:
   name: oom-alert
+  namespace: openshift-monitoring
 spec:
   groups:
   - name: OOM
