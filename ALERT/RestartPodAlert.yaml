@@ -10,7 +10,7 @@ spec:
     - alert: PodRestartsAlert
       for: 5m
       expr: |
-        sum by (pod, namespace) (increase(kube_pod_container_status_restarts_total{namespace!~"openshift-.*|kube-.*"}[1h])) > 5
+        sum by (pod, namespace) (increase(kube_pod_container_status_restarts_total{namespace!~"openshift-.*|kube-.*"}[1h])) > 1
       labels:
         severity: warning
       annotations:
