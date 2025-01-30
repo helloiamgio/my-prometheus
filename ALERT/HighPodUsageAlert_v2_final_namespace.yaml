@@ -11,7 +11,7 @@ spec:
       for: 5m
       expr: |
         (sum(rate(container_cpu_usage_seconds_total{container!="",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}[5m])) by (pod, namespace)
-        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 90
+        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 85
       labels:
         severity: warning
       annotations:
@@ -21,7 +21,7 @@ spec:
       for: 5m
       expr: |
         (sum(rate(container_cpu_usage_seconds_total{container!="",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}[5m])) by (pod, namespace)
-        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 95
+        / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (pod, namespace)) * 100 > 90
       labels:
         severity: critical
       annotations:
@@ -31,7 +31,7 @@ spec:
       for: 5m
       expr: |
         (sum(container_memory_usage_bytes{container!="",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)
-        / sum(kube_pod_container_resource_limits{resource="memory",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)) * 100 > 90
+        / sum(kube_pod_container_resource_limits{resource="memory",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)) * 100 > 85
       labels:
         severity: warning
       annotations:
@@ -41,7 +41,7 @@ spec:
       for: 5m
       expr: |
         (sum(container_memory_usage_bytes{container!="",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)
-        / sum(kube_pod_container_resource_limits{resource="memory",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)) * 100 > 95
+        / sum(kube_pod_container_resource_limits{resource="memory",namespace=~"^(3i-scrivaniadigitale-be|3i-scrivaniadigitale-fe|3i-scrivaniadigitale-mgw|3i-scrivaniadigitale-vvp-jobs-prod|3j-schedacliente-be|3j-schedacliente-fe|3j-schedacliente-mgw)$"}) by (pod, namespace)) * 100 > 90
       labels:
         severity: critical
       annotations:
