@@ -1,0 +1,63 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: worker-node-usage-alerts
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: worker-node-usage.rules
+    rules:
+    - alert: HighWorkerCPUUsage
+      expr: |
+        100 * sum by (instance) (
+          rate(node_cpu_seconds_total{mode!="idle", instance=~".*worker.*"}[5m])
+        )
+        /
+        sum by (instance) (
+          rate(node_cpu_seconds_total{instance=~".*worker.*"}[5m])
+        ) > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "CPU usage > 90% on worker node"
+        description: "CPU usage on node {{ $labels.instance }} is above 90% for more than 5 minutes."
+
+    - alert: HighWorkerCPURequests
+      expr: |
+        100 * sum(kube_pod_container_resource_requests{resource="cpu", unit="core"}) by (node)
+        /
+        sum(kube_node_status_allocatable{resource="cpu", unit="core", node=~".*worker.*"}) by (node) > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "CPU requests > 90% on worker node"
+        description: "CPU requests on node {{ $labels.node }} exceed 90% of allocatable CPU for more than 5 minutes."
+
+    - alert: HighWorkerMemoryUsage
+      expr: |
+        100 * (1 - (
+          sum(node_memory_MemAvailable_bytes{instance=~".*worker.*"}) by (instance)
+          /
+          sum(node_memory_MemTotal_bytes{instance=~".*worker.*"}) by (instance)
+        )) > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Memory usage > 90% on worker node"
+        description: "Memory usage on node {{ $labels.instance }} is above 90% for more than 5 minutes."
+
+    - alert: HighWorkerMemoryRequests
+      expr: |
+        100 * sum(kube_pod_container_resource_requests{resource="memory", unit="byte"}) by (node)
+        /
+        sum(kube_node_status_allocatable{resource="memory", unit="byte", node=~".*worker.*"}) by (node) > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Memory requests > 90% on worker node"
+        description: "Memory requests on node {{ $labels.node }} exceed 90% of allocatable memory for more than 5 minutes."
