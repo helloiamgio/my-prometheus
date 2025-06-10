@@ -1,0 +1,33 @@
+cluster:node_cpu:ratio_rate5m{cluster=""}
+sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="cpu",cluster=""})
+sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="cpu",cluster=""})
+
+sum(:node_memory_MemAvailable_bytes:sum{cluster=""}) / sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""})
+sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
+sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
+
+
+
+# CPU Usage per nodo worker (media su 5m)
+100 * avg(rate(node_cpu_seconds_total{mode!="idle", instance=~".*worker.*"}[5m])) by (instance)
+  / avg(count(node_cpu_seconds_total{mode="idle", instance=~".*worker.*"}) by (instance))
+
+# CPU Requests per nodo worker
+100 * sum(kube_pod_container_resource_requests{resource="cpu", unit="core"}) by (node)
+  / sum(kube_node_status_allocatable{resource="cpu", unit="core"}) by (node)
+
+# CPU Limits per nodo worker
+100 * sum(kube_pod_container_resource_limits{resource="cpu", unit="core"}) by (node)
+  / sum(kube_node_status_allocatable{resource="cpu", unit="core"}) by (node)
+
+# Memoria usata per nodo worker
+100 * (1 - (sum(node_memory_MemAvailable_bytes{instance=~".*worker.*"}) by (instance)
+  / sum(node_memory_MemTotal_bytes{instance=~".*worker.*"}) by (instance)))
+
+# Memoria Requests per nodo worker
+100 * sum(kube_pod_container_resource_requests{resource="memory", unit="byte"}) by (node)
+  / sum(kube_node_status_allocatable{resource="memory", unit="byte"}) by (node)
+
+# Memoria Limits per nodo worker
+100 * sum(kube_pod_container_resource_limits{resource="memory", unit="byte"}) by (node)
+  / sum(kube_node_status_allocatable{resource="memory", unit="byte"}) by (node)
