@@ -31,3 +31,17 @@ sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=""}) / sum(k
 # Memoria Limits per nodo worker
 100 * sum(kube_pod_container_resource_limits{resource="memory", unit="byte"}) by (node)
   / sum(kube_node_status_allocatable{resource="memory", unit="byte"}) by (node)
+
+# RAM disponibile per scheduling (requests)
+(
+  sum(kube_node_status_allocatable{resource="memory", unit="byte", node=~".*worker.*"}) by (node)
+  -
+  sum(kube_pod_container_resource_requests{resource="memory", unit="byte", node=~".*worker.*"}) by (node)
+) / 1024 / 1024 / 1024
+
+# CPU disponibile per scheduling (requests)
+(
+  sum(kube_node_status_allocatable{resource="cpu", unit="core", node=~".*worker.*"}) by (node)
+  -
+  sum(kube_pod_container_resource_requests{resource="cpu", unit="core", node=~".*worker.*"}) by (node)
+)  
