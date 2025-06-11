@@ -1,0 +1,5 @@
+count by (namespace) (
+  count_over_time(
+    kube_deployment_status_replicas{namespace!~"^(openshift.*|kube.*|open.*|default|zabbix|dynatrace)"}[60d:]
+  )
+)
