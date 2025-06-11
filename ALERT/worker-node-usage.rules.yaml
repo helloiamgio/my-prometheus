@@ -28,12 +28,12 @@ spec:
       expr: |
         100 * sum(kube_pod_container_resource_requests{resource="cpu", unit="core"}) by (node)
         /
-        sum(kube_node_status_allocatable{resource="cpu", unit="core", node=~".*worker.*"}) by (node) > 90
+        sum(kube_node_status_allocatable{resource="cpu", unit="core", node=~".*worker.*"}) by (node) > 95
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: "CPU requests > 90% on worker node"
+        summary: "CPU requests > 95% on worker node"
         description: "CPU requests on node {{ $labels.node }} exceed 90% of allocatable CPU for more than 5 minutes."
 
     - alert: HighWorkerMemoryUsage
@@ -54,10 +54,10 @@ spec:
       expr: |
         100 * sum(kube_pod_container_resource_requests{resource="memory", unit="byte"}) by (node)
         /
-        sum(kube_node_status_allocatable{resource="memory", unit="byte", node=~".*worker.*"}) by (node) > 90
+        sum(kube_node_status_allocatable{resource="memory", unit="byte", node=~".*worker.*"}) by (node) > 95
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: "Memory requests > 90% on worker node"
+        summary: "Memory requests > 95% on worker node"
         description: "Memory requests on node {{ $labels.node }} exceed 90% of allocatable memory for more than 5 minutes."
