@@ -1,0 +1,41 @@
+NooBaa_resource_status{resource_name=~".*"} == 0
+
+NooBaa_health_status
+
+
+apiVersion: monitoring.openshift.io/v1
+kind: PrometheusRule
+metadata:
+  name: quay-app-alerts
+  namespace: openshift-monitoring  # usa il namespace corretto per le regole
+spec:
+  groups:
+  - name: quay-app.rules
+    rules:
+    - alert: QuayAppRestartCritical
+      expr: increase(kube_pod_container_status_restarts_total{pod=~".*-quay-app-.*"}[10m]) > 5
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High container restarts in quay-app pod"
+        description: >
+          Container in pod {{ $labels.pod }} (namespace {{ $labels.namespace }}) has restarted more than 5 times in the last 10 minutes.
+
+    - alert: QuayAppCrashLoopBackOffCritical
+      expr: |
+        max_over_time(
+          kube_pod_container_status_waiting_reason{
+            job="kube-state-metrics",
+            reason="CrashLoopBackOff",
+            pod=~".*quay.*"
+          }[5m]
+        ) >= 1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Quay pod in CrashLoopBackOff state"
+        description: >
+          Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in CrashLoopBackOff for at least 2 minutes.
+
