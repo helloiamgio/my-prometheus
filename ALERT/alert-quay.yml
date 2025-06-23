@@ -2,9 +2,9 @@ NooBaa_resource_status{resource_name=~".*"} == 0
 
 NooBaa_health_status
 
-
+---
 apiVersion: monitoring.openshift.io/v1
-kind: PrometheusRule
+kind: AlertingRule
 metadata:
   name: quay-app-alerts
   namespace: openshift-monitoring
