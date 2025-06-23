@@ -7,7 +7,7 @@ apiVersion: monitoring.openshift.io/v1
 kind: PrometheusRule
 metadata:
   name: quay-app-alerts
-  namespace: openshift-monitoring  # usa il namespace corretto per le regole
+  namespace: openshift-monitoring
 spec:
   groups:
   - name: quay-app.rules
