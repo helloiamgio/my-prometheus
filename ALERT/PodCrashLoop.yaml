@@ -20,5 +20,5 @@ spec:
       labels:
         severity: critical
       annotations:
-        summary: "Pod in CrashLoopBackOff nel namespace {{ $labels.namespace }}"
-        description: "Il pod {{ $labels.pod }} nel namespace {{ $labels.namespace }} è in CrashLoopBackOff da almeno 2 minuti"
+        summary: "Pod in CrashLoopBackOff state in namespace {{ $labels.namespace }}"
+        description: "The pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in CrashLoopBackOff state for at least 2 minutes."
