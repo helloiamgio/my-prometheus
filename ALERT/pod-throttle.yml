@@ -1,0 +1,77 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerHighThrottleRate
+spec:
+  annotations:
+    description: '"Container is being throttled\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
+    summary: Container high throttle rate (instance {{ $labels.instance }})
+  expr: |
+    sum(
+      increase(container_cpu_cfs_throttled_periods_total{container!="", namespace!~"^(openshift-|kube-).*"}[5m])
+    ) by (container, pod, namespace)
+    /
+    sum(
+      increase(container_cpu_cfs_periods_total{namespace!~"^(openshift-|kube-).*"}[5m])
+    ) by (container, pod, namespace)
+    > (25 / 100)
+  for: 5m
+  labels:
+    severity: warning
+---
+(
+  sum(
+    increase(container_cpu_cfs_throttled_periods_total{container!="", namespace!~"^(openshift-|kube-).*"}[5m])
+  ) by (container, pod, namespace)
+  /
+  sum(
+    increase(container_cpu_cfs_periods_total{namespace!~"^(openshift-|kube-).*"}[5m])
+  ) by (container, pod, namespace)
+) * 100
+
+---
+RED HAT -->
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: ContainerHighThrottleRate
+spec:
+  annotations:
+    description: '"Container is being throttled\nVALUE = {{ printf "%.2f" $value }}%%\nLABELS = {{ $labels }}"'
+    summary: Container high throttle rate (instance {{ $labels.instance }})
+  expr: |
+    (
+      sum(
+        increase(container_cpu_cfs_throttled_periods_total{
+          job="kubelet",
+          metrics_path="/metrics/cadvisor",
+          container!="",
+          cluster="",
+          namespace!~"^(openshift-|kube-).*"
+        }[5m])
+      ) by (namespace, pod, container)
+      /
+      sum(
+        increase(container_cpu_cfs_periods_total{
+          job="kubelet",
+          metrics_path="/metrics/cadvisor",
+          container!="",
+          cluster="",
+          namespace!~"^(openshift-|kube-).*"
+        }[5m])
+      ) by (namespace, pod, container)
+    ) * 100 > 25
+  for: 5m
+  labels:
+    severity: warning
+---
+(
+  sum(
+    increase(container_cpu_cfs_throttled_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", container!="", cluster="", namespace!~"^(openshift-|kube-).*"}[5m])
+  ) by (namespace, pod, container)
+  /
+  sum(
+    increase(container_cpu_cfs_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", container!="", cluster="", namespace!~"^(openshift-|kube-).*"}[5m])
+  ) by (namespace, pod, container)
+) * 100
+
