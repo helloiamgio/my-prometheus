@@ -1,17 +1,16 @@
 apiVersion: monitoring.openshift.io/v1
 kind: AlertingRule
 metadata:
-  name: oom-alert
+  name: oomkilled-pods-alert
   namespace: openshift-monitoring
 spec:
   groups:
-  - name: OOM
+  - name: oomkilled-pod.rules
     rules:
     - alert: PodOOMKilled
-      annotations:
-        description: Container {{ $labels.container }} is OOM killed in Pod {{ $labels.pod
-          }}
-        summary: Pod is OOMKilled  {{ $labels.pod }}
-      expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}
+      expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled", namespace!~"^(openshift-|kube-).*"}
       labels:
-        severity: warning
+        severity: critical
+      annotations:
+        summary: "OOMKilled in pod '{{ $labels.pod }}' namespace '{{ $labels.namespace }}'"
+        description: "Il pod '{{ $labels.pod }}' nel namespace '{{ $labels.namespace }}' è stato terminato per OOMKilled."
