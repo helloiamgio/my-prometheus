@@ -30,40 +30,45 @@ spec:
 ) * 100
 
 ---
-RED HAT -->
+### RED HAT ### 
 apiVersion: monitoring.openshift.io/v1
 kind: AlertingRule
 metadata:
-  name: ContainerHighThrottleRate
+  name: pod-high-throttle-rate
+  namespace: openshift-monitoring
 spec:
-  annotations:
-    description: '"Container is being throttled\nVALUE = {{ printf "%.2f" $value }}%%\nLABELS = {{ $labels }}"'
-    summary: Container high throttle rate (instance {{ $labels.instance }})
-  expr: |
-    (
-      sum(
-        increase(container_cpu_cfs_throttled_periods_total{
-          job="kubelet",
-          metrics_path="/metrics/cadvisor",
-          container!="",
-          cluster="",
-          namespace!~"^(openshift-|kube-).*"
-        }[5m])
-      ) by (namespace, pod, container)
-      /
-      sum(
-        increase(container_cpu_cfs_periods_total{
-          job="kubelet",
-          metrics_path="/metrics/cadvisor",
-          container!="",
-          cluster="",
-          namespace!~"^(openshift-|kube-).*"
-        }[5m])
-      ) by (namespace, pod, container)
-    ) * 100 > 25
-  for: 5m
-  labels:
-    severity: warning
+  groups:
+    - name: pod-throttle-rules
+      rules:
+        - alert: PodHighThrottleRate
+          expr: |
+            (
+              sum(
+                increase(container_cpu_cfs_throttled_periods_total{
+                  job="kubelet",
+                  metrics_path="/metrics/cadvisor",
+                  container!="",
+                  cluster="",
+                  namespace!~"^(openshift-|kube-).*"
+                }[5m])
+              ) by (namespace, pod, container)
+              /
+              sum(
+                increase(container_cpu_cfs_periods_total{
+                  job="kubelet",
+                  metrics_path="/metrics/cadvisor",
+                  container!="",
+                  cluster="",
+                  namespace!~"^(openshift-|kube-).*"
+                }[5m])
+              ) by (namespace, pod, container)
+            ) * 100 > 25
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Pod high throttle rate (instance {{ $labels.instance }})
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is being throttled. VALUE = {{ printf \"%.2f\" $value }}%%"
 ---
 (
   sum(
