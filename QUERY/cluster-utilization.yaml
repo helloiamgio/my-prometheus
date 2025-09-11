@@ -7,7 +7,6 @@ sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=""}) / sum
 sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
 
 
-
 # CPU Usage per nodo worker (media su 5m)
 100 * avg(rate(node_cpu_seconds_total{mode!="idle", instance=~".*worker.*"}[5m])) by (instance)
   / avg(count(node_cpu_seconds_total{mode="idle", instance=~".*worker.*"}) by (instance))
@@ -66,3 +65,20 @@ max_over_time(instance:node_cpu_utilisation:rate1m{job="node-exporter"} [30d]) *
   /
   sum by (instance) (rate(node_cpu_seconds_total{instance=~".*worker.*"}[5m]))
 )
+
+# TOP CONSUMER NAMESPACE MEMORY
+topk(
+  10,
+  sum by (namespace) (
+    container_memory_rss{
+      job="kubelet",
+      metrics_path="/metrics/cadvisor",
+      cluster="",
+      container!="",
+      namespace!~"openshift-.*|kube-.*"
+    }
+  )
+)
+
+
+
