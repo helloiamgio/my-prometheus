@@ -9,17 +9,10 @@ sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster=""})
 sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster=""}) 
 / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="cpu",cluster=""})
 
-# Percentuale di memoria realmente disponibile sui nodi rispetto alla memoria totale
-sum(:node_memory_MemAvailable_bytes:sum{cluster=""}) 
-/ sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""})
+sum(:node_memory_MemAvailable_bytes:sum{cluster=""}) / sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""})
+sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
+sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=""}) / sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
 
-# Percentuale di memoria richiesta dai pod rispetto alla memoria allocabile del cluster
-sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=""}) 
-/ sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
-
-# Percentuale di memoria limits impostati dai pod rispetto alla memoria allocabile del cluster
-sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=""}) 
-/ sum(kube_node_status_allocatable{job="kube-state-metrics",resource="memory",cluster=""})
 
 
 # CPU Usage per nodo worker (media su 5m)
@@ -80,18 +73,3 @@ max_over_time(instance:node_cpu_utilisation:rate1m{job="node-exporter"} [30d]) *
   /
   sum by (instance) (rate(node_cpu_seconds_total{instance=~".*worker.*"}[5m]))
 )
-
-# CPU REQUEST TOTALE NODI WORKER 
-sum(
-  kube_pod_container_resource_requests{resource="cpu"}
-  * on(pod, namespace) group_left(node)
-    kube_pod_info{node=~".*worker.*"}
-)
-
-# RAM REQUEST TOTALE NODI WORKER 
-sum(
-  kube_pod_container_resource_requests{resource="memory"}
-  * on(pod, namespace) group_left(node)
-    kube_pod_info{node=~".*worker.*"}
-) / 1024^3
-
