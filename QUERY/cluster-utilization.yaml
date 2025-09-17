@@ -73,3 +73,17 @@ max_over_time(instance:node_cpu_utilisation:rate1m{job="node-exporter"} [30d]) *
   /
   sum by (instance) (rate(node_cpu_seconds_total{instance=~".*worker.*"}[5m]))
 )
+
+# CPU REQUEST TOTALE NODI WORKER
+sum(
+  kube_pod_container_resource_requests{resource="cpu"}
+  * on(pod, namespace) group_left(node)
+    kube_pod_info{node=~".*worker.*"}
+)
+
+# RAM REQUEST TOTALE NODI WORKER
+sum(
+  kube_pod_container_resource_requests{resource="memory"}
+  * on(pod, namespace) group_left(node)
+    kube_pod_info{node=~".*worker.*"}
+) / 1024^3
