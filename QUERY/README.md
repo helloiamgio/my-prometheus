@@ -132,3 +132,12 @@ sum(
   * on(pod, namespace) group_left(node)
     kube_pod_info{node=~".*worker.*"}
 ) / 1024^3
+```
+
+**# CPU ALLOCATABLE TOTALE NODI WORKER**
+```
+sum(
+  kube_node_status_allocatable{resource="cpu"} 
+  * on(node) group_left(role) kube_node_role{role="worker"}
+)
+```
